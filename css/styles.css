@@ -170,7 +170,6 @@ input:focus-visible { outline: none; border-color: var(--pink); box-shadow: 0 0 
 @media (min-width: 960px) {
   #buyView { max-width: 1120px; grid-template-columns: 1.35fr 1fr; align-items: start; padding-top: 24px; }
   #buyView .hero { grid-row: 1 / span 2; }
-  #buyView .step { position: sticky; top: 76px; }
   #buyView .footnote { grid-column: 1 / -1; }
 }
 
@@ -187,11 +186,7 @@ input:focus-visible { outline: none; border-color: var(--pink); box-shadow: 0 0 
   .kpi strong { font-size: 1.5rem; }
 }
 
-.site-footer { text-align: center; padding: 8px 16px 28px; font-size: .9rem; }
+.site-footer { text-align: center; padding: 8px 16px 28px; font-size: .9rem; clear: both; }
 .site-footer a { color: var(--muted); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
 .site-footer a:hover, .site-footer a:focus-visible { color: var(--magenta); }
-.site-footer .pi {
-  display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; border-radius: 50%;
-  background: linear-gradient(135deg, var(--plum), var(--magenta)); color: var(--yellow);
-  font: 900 1.05em/1 Georgia, 'Times New Roman', serif;
-}
+.site-footer .pi { width: 1em; height: auto; display: block; }
