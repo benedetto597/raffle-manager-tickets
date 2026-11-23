@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js';
-import { rpc } from './api.js';
-import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js';
-import { drawWheel, spinTo, downloadWinner } from './wheel.js';
-import { refreshPublic, loadWhatsapp } from './buy.js';
+import { CONFIG } from './config.js?v=6';
+import { rpc } from './api.js?v=6';
+import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js?v=6';
+import { drawWheel, spinTo, downloadWinner } from './wheel.js?v=6';
+import { refreshPublic, loadWhatsapp } from './buy.js?v=6';
 
 const LABEL = { disponible: 'Disponible', por_verificar: 'Por verificar', vendido: 'Vendido' };
 const FILTERS = [['all', 'Todos'], ['por_verificar', 'Por verificar'], ['vendido', 'Vendidos'], ['disponible', 'Disponibles']];

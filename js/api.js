@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js';
+import { CONFIG } from './config.js?v=6';
 
 const MESSAGES = {
   AGOTADO: 'Ya no quedan boletos disponibles. ¡Gracias por tu apoyo!',

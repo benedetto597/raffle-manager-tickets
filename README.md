@@ -111,6 +111,10 @@ python -m http.server 5173
    ```
 2. **Frontend:** importa el repo en Vercel (framework *Other*, sin comando de build). Cada push a `main` se despliega solo.
 3. Ajusta `connect-src` en `vercel.json` si cambias de proyecto Supabase.
+4. Al cambiar CSS o JS, sube el número de versión `?v=N` en `index.html` y en los `import` de `js/*.js`; así ningún navegador usa archivos viejos de su caché:
+   ```bash
+   V=7; sed -i -E "s#(\.js|\.css)\?v=[0-9]+#?v=$V#g" index.html js/*.js
+   ```
 
 ## Configuración
 

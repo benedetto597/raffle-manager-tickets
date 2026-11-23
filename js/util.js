@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js';
+import { CONFIG } from './config.js?v=6';
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const pad = (n) => String(n).padStart(3, '0');

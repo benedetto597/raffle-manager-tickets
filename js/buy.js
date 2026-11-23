@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js';
-import { rpc } from './api.js';
-import { $, pad, money, waLink, sleep, prefersReducedMotion } from './util.js';
+import { CONFIG } from './config.js?v=6';
+import { rpc } from './api.js?v=6';
+import { $, pad, money, waLink, sleep, prefersReducedMotion } from './util.js?v=6';
 
 const HOLD_MS = 9.8 * 60 * 1000; // margen bajo los 10 min del servidor
 let hold = null; // { n, token }
