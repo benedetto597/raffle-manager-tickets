@@ -60,7 +60,7 @@
 <ol>
   <li>Toca <strong>🔒 Admin</strong>, en la esquina superior derecha.</li>
   <li>Escribe el <strong>PIN de 6 dígitos</strong> y toca <strong>Entrar</strong>.</li>
-  <li><strong>➕ Venta manual</strong>: registra un boleto que ya te pagaron por fuera de la página (por ejemplo, en efectivo). Escribe el número (o déjalo vacío para asignar uno al azar), el nombre y el teléfono; queda directamente como <span class="badge v">Vendido</span>. También puedes usar el botón <strong>➕ Vender</strong> de cualquier boleto disponible en la lista.</li>
+  <li><strong>➕ Venta manual</strong>: registra un boleto que ya te pagaron por fuera de la página (por ejemplo, en efectivo). Escribe el número (o déjalo vacío para asignar uno al azar), el nombre, el teléfono y la cuenta de origen del pago (o <em>Efectivo</em>); queda directamente como <span class="badge v">Vendido</span>. También puedes usar el botón <strong>➕ Vender</strong> de cualquier boleto disponible en la lista.</li>
   <li><strong>🎯 Meta</strong>: cambia la meta de recaudación (múltiplo de L 100). La cantidad de boletos se recalcula sola (meta ÷ L 100) y se actualizan la página pública y el dashboard. Si la bajas, solo se eliminan boletos libres del final; si alguno ya está apartado o vendido, el sistema no lo permite.</li>
   <li><strong>📱 WhatsApp</strong>: número que recibe los mensajes de compra. <strong>Configúralo con el número de la encargada antes de compartir el enlace.</strong></li>
   <li>Para salir, toca <strong>Salir del panel</strong>. Al recargar la página también se cierra la sesión.</li>
@@ -70,13 +70,13 @@
 <h3>4.2 Pestaña 🎟️ Boletos (verificar pagos)</h3>
 <ul>
   <li>Al entrar se muestra el filtro <span class="badge p">Por verificar</span> para avanzar rápido. Cada filtro muestra su cantidad.</li>
-  <li>El buscador acepta número (<code>26</code> o <code>#026</code>), nombre o parte del teléfono.</li>
+  <li>El buscador acepta número (<code>26</code> o <code>#026</code>), nombre, parte del teléfono o la cuenta de pago.</li>
   <li>El teléfono es un enlace: abre WhatsApp con esa persona para pedirle el comprobante.</li>
   <li>Acciones:
     <ul>
-      <li><strong>✓ Verificar pago</strong>: el boleto pasa de <span class="badge p">Por verificar</span> a <span class="badge v">Vendido</span> y se guarda la fecha de venta.</li>
+      <li><strong>✓ Verificar pago</strong>: se abre una ventana que pide el <strong>número de cuenta de origen</strong> del pago (lo ves en el comprobante). Es obligatorio: sin él no se puede verificar. Al guardar, el boleto pasa de <span class="badge p">Por verificar</span> a <span class="badge v">Vendido</span> y se guardan la fecha y la cuenta, que aparece en la columna <em>Cuenta de pago</em>.</li>
       <li><strong>Liberar</strong>: si la persona no pagó, el boleto vuelve a <span class="badge d">Disponible</span> y se borran sus datos. Pide confirmación.</li>
-      <li><strong>↩ Por verificar</strong>: deshace una verificación hecha por error.</li>
+      <li><strong>↩ Por verificar</strong>: deshace una verificación hecha por error (también borra la cuenta registrada).</li>
     </ul>
   </li>
   <li>Toca <strong>↻ Actualizar</strong> para ver las compras nuevas.</li>

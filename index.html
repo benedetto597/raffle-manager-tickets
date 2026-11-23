@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;600;800;900&display=swap">
-  <link rel="stylesheet" href="/css/styles.css?v=9">
-  <script type="module" src="/js/main.js?v=9"></script>
+  <link rel="stylesheet" href="/css/styles.css?v=10">
+  <script type="module" src="/js/main.js?v=10"></script>
 </head>
 <body>
   <header class="topbar">
@@ -101,7 +101,7 @@
       </div>
       <div class="table-wrap">
         <table class="tickets">
-          <thead><tr><th>#</th><th>Estado</th><th>Nombre</th><th>Teléfono</th><th>Apartado</th><th>Vendido</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>#</th><th>Estado</th><th>Nombre</th><th>Teléfono</th><th>Apartado</th><th>Vendido</th><th>Cuenta de pago</th><th>Acciones</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
@@ -192,6 +192,22 @@
     </form>
   </dialog>
 
+  <dialog id="verifyDlg" class="dialog">
+    <form id="verifyForm" method="dialog" novalidate>
+      <h2 id="verifyTitle">Verificar pago</h2>
+      <p id="verifyInfo" class="muted"></p>
+      <p class="muted">Revisa el comprobante y escribe el número de cuenta desde la que se hizo el pago. Es obligatorio para dar el boleto por vendido.</p>
+      <label>Número de cuenta de origen
+        <input name="cuenta" autocomplete="off" maxlength="40" required placeholder="Ej. 1234-5678-90">
+      </label>
+      <p id="verifyMsg" class="msg" role="alert"></p>
+      <div class="row">
+        <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit">✓ Verificar pago</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="saleDlg" class="dialog">
     <form id="saleForm" method="dialog" novalidate>
       <h2>Registrar venta manual</h2>
@@ -204,6 +220,9 @@
       </label>
       <label>Teléfono
         <input name="telefono" type="tel" inputmode="tel" autocomplete="off" maxlength="20" required placeholder="Ej. 9999-9999">
+      </label>
+      <label>Cuenta de origen del pago
+        <input name="cuenta" autocomplete="off" maxlength="40" required placeholder="Ej. 1234-5678-90 o Efectivo">
       </label>
       <p id="saleMsg" class="msg" role="alert"></p>
       <div class="row">

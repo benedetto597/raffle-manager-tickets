@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js?v=9';
+import { CONFIG } from './config.js?v=10';
 
 const MESSAGES = {
   AGOTADO: 'Ya no quedan boletos disponibles. ¡Gracias por tu apoyo!',
@@ -13,6 +13,7 @@ const MESSAGES = {
   ganador: 'No se puede liberar el boleto ganador.',
   sin_vendidos: 'Aún no hay boletos vendidos (verificados) para sortear.',
   boleto: 'Boleto no encontrado.',
+  CUENTA: 'Escribe el número de cuenta de origen del pago (4 a 40 caracteres: letras, números, espacios o - . # /).',
   no_disponible: (d) => `El boleto #${String(d.n).padStart(3, '0')} no está disponible (${d.status === 'vendido' ? 'ya está vendido' : 'está por verificar'}).`,
   apartado: (d) => `El boleto #${String(d.n).padStart(3, '0')} lo está comprando alguien en este momento. Elige otro o intenta en unos minutos.`,
   meta_multiplo: 'La meta debe ser un múltiplo del precio del boleto.',

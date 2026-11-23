@@ -36,10 +36,11 @@ La encargada verifica los pagos y hace el sorteo desde un **panel protegido con 
 - Botón para comprar otro boleto y barra de boletos disponibles.
 
 **Panel administrativo** (botón *Admin* y PIN de 6 dígitos)
-- **Boletos:** lista del 1 al 200 con filtros por estado (*Disponible*, *Por verificar*, *Vendido*) y búsqueda. Acciones: verificar pago, liberar y revertir. Incluye enlace a WhatsApp de cada comprador.
+- **Boletos:** lista completa con filtros por estado (*Disponible*, *Por verificar*, *Vendido*) y búsqueda por número, nombre, teléfono o cuenta. Acciones: verificar pago, liberar, revertir y vender. Incluye enlace a WhatsApp de cada comprador.
+- **Verificar pago:** abre una ventana que exige el **número de cuenta de origen** del pago; sin ese dato el boleto no pasa a *Vendido*. La cuenta queda visible en la lista.
 - **Dashboard:** KPIs, avance de la meta, boletos por día (resalta el mejor día) y últimos movimientos.
 - **Sorteo:** ruleta con los boletos vendidos. El ganador lo elige el servidor y queda registrado; la imagen del ganador se descarga en **PNG o JPEG**.
-- **Venta manual:** registra boletos pagados fuera de la página (número elegido o al azar) directamente como vendidos; también desde el botón *Vender* de cada boleto disponible.
+- **Venta manual:** registra boletos pagados fuera de la página (número elegido o al azar) directamente como vendidos, con cuenta de origen obligatoria (o "Efectivo"); también desde el botón *Vender* de cada boleto disponible.
 - **Meta** configurable: recalcula la cantidad de boletos (meta ÷ precio) y actualiza todos los textos.
 - Cambiar PIN, configurar el WhatsApp destino y salir del panel.
 
@@ -59,12 +60,12 @@ Supabase Postgres
 | `available_numbers()` | público | Números disponibles (sin datos personales) |
 | `hold_ticket()` | público | Aparta un número aleatorio 10 min (`FOR UPDATE SKIP LOCKED`) |
 | `confirm_ticket(token, nombre, tel)` | público | Pasa el boleto apartado a *por verificar* |
-| `admin_list(pin)` | PIN | Lista completa + último ganador |
-| `admin_set_status(pin, n, status)` | PIN | Transiciones válidas de estado |
+| `admin_list(pin)` | PIN | Lista completa (incluye cuenta de pago) + último ganador |
+| `admin_set_status(pin, n, status, cuenta)` | PIN | Transiciones válidas de estado; pasar a *vendido* exige `cuenta` |
 | `admin_draw(pin)` | PIN | Sorteo aleatorio entre vendidos, registrado en `draws` |
 | `admin_change_pin(pin, nuevo)` | PIN | Cambia el PIN |
 | `public_config()` | público | WhatsApp destino, meta, precio y total de boletos |
-| `admin_add_sale(pin, n, nombre, tel)` | PIN | Registra una venta manual como *vendido* (`n` nulo = al azar) |
+| `admin_add_sale(pin, n, nombre, tel, cuenta)` | PIN | Registra una venta manual como *vendido* (`n` nulo = al azar; `cuenta` obligatoria) |
 | `admin_set_goal(pin, meta)` | PIN | Cambia la meta; agrega o quita boletos libres del final |
 | `admin_set_whatsapp(pin, num)` | PIN | Cambia el WhatsApp destino |
 
@@ -74,7 +75,7 @@ Supabase Postgres
 - **PIN** guardado como hash **bcrypt** (`pgcrypto`). Tras **5 intentos fallidos** el acceso se bloquea **10 minutos**. El PIN nunca se versiona.
 - **Asignación atómica:** no puede haber números duplicados aunque compren varias personas a la vez.
 - **Anti-acaparamiento:** máximo 40 apartados activos simultáneos; los apartados vencidos vuelven al pool.
-- **Validación en servidor** de nombre (2–80 caracteres) y teléfono (8–15 dígitos).
+- **Validación en servidor** de nombre (2–80 caracteres), teléfono (8–15 dígitos) y cuenta de pago (4–40 caracteres: letras, números, espacio, `-` `.` `#` `/`).
 - **Frontend:** sin `innerHTML` con datos de usuario (solo `textContent`), CSP estricta sin `unsafe-inline`, HSTS, `nosniff` y `frame-ancestors 'none'` (ver [`vercel.json`](vercel.json)).
 
 > La publishable key de Supabase en `js/config.js` es pública por diseño; la protección real está en RLS y en las funciones.
@@ -135,7 +136,7 @@ python -m http.server 5173
 
 - **Restablecer el PIN olvidado:** ejecuta el `update` de la sección *Despliegue* en el SQL Editor de Supabase.
 - **Desbloquear el panel:** `update public.admin_cfg set fails = 0, locked_until = null where id = 1;`
-- **Reiniciar la rifa** (borra todo): `delete from draws; update tickets set status='disponible', nombre=null, telefono=null, hold_token=null, held_until=null, reservado_at=null, vendido_at=null;`
+- **Reiniciar la rifa** (borra todo): `delete from draws; update tickets set status='disponible', nombre=null, telefono=null, hold_token=null, held_until=null, cuenta_pago=null, reservado_at=null, vendido_at=null;`
 
 ## Licencia
 

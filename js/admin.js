@@ -1,8 +1,8 @@
-import { rpc } from './api.js?v=9';
-import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js?v=9';
-import { drawWheel, spinTo, downloadWinner } from './wheel.js?v=9';
-import { refreshPublic, loadWhatsapp } from './buy.js?v=9';
-import { settings, loadSettings } from './settings.js?v=9';
+import { rpc } from './api.js?v=10';
+import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js?v=10';
+import { drawWheel, spinTo, downloadWinner } from './wheel.js?v=10';
+import { refreshPublic, loadWhatsapp } from './buy.js?v=10';
+import { settings, loadSettings } from './settings.js?v=10';
 
 const LABEL = { disponible: 'Disponible', por_verificar: 'Por verificar', vendido: 'Vendido' };
 const FILTERS = [['all', 'Todos'], ['por_verificar', 'Por verificar'], ['vendido', 'Vendidos'], ['disponible', 'Disponibles']];
@@ -86,6 +86,7 @@ function renderRows() {
   const list = state.tickets.filter((t) =>
     (state.filter === 'all' || t.status === state.filter) &&
     (!q || String(t.n) === q.replace(/^#?0*/, '') || t.nombre?.toLowerCase().includes(q) ||
+      t.cuenta_pago?.toLowerCase().includes(q) ||
       (qDigits.length >= 3 && t.telefono?.includes(qDigits))));
 
   const frag = document.createDocumentFragment();
@@ -93,7 +94,7 @@ function renderRows() {
     const acts = el('div', { class: 'acts' });
     if (t.status === 'por_verificar') {
       acts.append(
-        actionBtn('✓ Verificar pago', 'btn--primary', t.n, 'vendido'),
+        el('button', { class: 'btn btn--xs btn--primary', type: 'button', text: '✓ Verificar pago', onclick: () => openVerify(t) }),
         actionBtn('Liberar', 'btn--ghost', t.n, 'disponible',
           [`Liberar boleto #${pad(t.n)}`, `El boleto volverá a estar disponible y se borrarán los datos de ${t.nombre}.`, 'Liberar']),
       );
@@ -113,6 +114,7 @@ function renderRows() {
       el('td', { 'data-label': 'Teléfono', class: empty(t.telefono) }, phone),
       el('td', { 'data-label': 'Apartado', class: empty(t.reservado_at), text: fmtDate(t.reservado_at) }),
       el('td', { 'data-label': 'Vendido', class: empty(t.vendido_at), text: fmtDate(t.vendido_at) }),
+      el('td', { 'data-label': 'Cuenta de pago', class: empty(t.cuenta_pago), text: t.cuenta_pago ?? '—' }),
       el('td', { class: acts.childElementCount ? null : 'is-empty' }, acts),
     ));
   }
@@ -260,6 +262,41 @@ function goalPreview() {
   return ok ? v : null;
 }
 
+// ---------- Verificar pago ----------
+const CUENTA_RE = /^[\p{L}\p{N} .#/-]{4,40}$/u;
+const cleanCuenta = (v) => v.trim().replace(/\s+/g, ' ');
+let verifying = null;
+
+function openVerify(t) {
+  verifying = t;
+  const f = $('#verifyForm');
+  f.reset();
+  $('#verifyTitle').textContent = `Verificar pago · boleto #${pad(t.n)}`;
+  $('#verifyInfo').textContent = `${t.nombre} · ${fmtPhone(t.telefono)} · ${money(settings.price)}`;
+  $('#verifyMsg').textContent = '';
+  $('#verifyDlg').showModal();
+  f.elements.cuenta.focus();
+}
+
+async function onVerify(ev) {
+  ev.preventDefault();
+  const f = ev.currentTarget;
+  const cuenta = cleanCuenta(f.elements.cuenta.value);
+  const msg = $('#verifyMsg');
+  if (!CUENTA_RE.test(cuenta)) { msg.textContent = 'Escribe el número de cuenta de origen del pago (4 a 40 caracteres: letras, números, espacios o - . # /).'; return; }
+  const btn = f.querySelector('[type="submit"]');
+  btn.disabled = true;
+  try {
+    await rpc('admin_set_status', { p_pin: state.pin, p_n: verifying.n, p_status: 'vendido', p_cuenta: cuenta });
+    $('#verifyDlg').close();
+    toast(`Boleto #${pad(verifying.n)} verificado como vendido.`, 'ok');
+    await load();
+  } catch (e) {
+    msg.textContent = e.message;
+    if (e.code === 'pin' || e.code === 'locked') { $('#verifyDlg').close(); logout(); }
+  } finally { btn.disabled = false; }
+}
+
 // ---------- Venta manual ----------
 function openSale(n = null) {
   const f = $('#saleForm');
@@ -282,11 +319,13 @@ async function onSaveSale(ev) {
   if (n !== null && (!Number.isInteger(n) || n < 1 || n > settings.total)) { msg.textContent = `El número debe estar entre 1 y ${settings.total}, o déjalo vacío para asignar uno al azar.`; return; }
   if (nombre.length < 2) { msg.textContent = 'Escribe el nombre completo del comprador.'; return; }
   if (tel.length < 8 || tel.length > 15) { msg.textContent = 'Escribe un teléfono válido (8 a 15 dígitos).'; return; }
+  const cuenta = cleanCuenta(f.elements.cuenta.value);
+  if (!CUENTA_RE.test(cuenta)) { msg.textContent = 'Escribe la cuenta de origen del pago, o "Efectivo" si te pagaron en efectivo.'; return; }
   const btn = f.querySelector('[type="submit"]');
   btn.disabled = true;
   msg.textContent = '';
   try {
-    const r = await rpc('admin_add_sale', { p_pin: state.pin, p_n: n, p_nombre: nombre, p_tel: tel });
+    const r = await rpc('admin_add_sale', { p_pin: state.pin, p_n: n, p_nombre: nombre, p_tel: tel, p_cuenta: cuenta });
     $('#saleDlg').close();
     await load();
     refreshPublic();
@@ -316,6 +355,8 @@ async function onSaveGoal(ev) {
 export function initAdmin() {
   const pinDlg = $('#pinDlg'), cpDlg = $('#changePinDlg'), waDlg = $('#waDlg'), goalDlg = $('#goalDlg');
   bindDialog(pinDlg); bindDialog(cpDlg); bindDialog(waDlg); bindDialog(goalDlg); bindDialog($('#saleDlg'));
+  bindDialog($('#verifyDlg'));
+  $('#verifyForm').addEventListener('submit', onVerify);
   $('#saleBtn').addEventListener('click', () => openSale());
   $('#saleForm').addEventListener('submit', onSaveSale);
   $('#goalBtn').addEventListener('click', async () => {
