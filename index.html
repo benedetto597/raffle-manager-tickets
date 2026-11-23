@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rifa Solidaria</title>
+  <meta name="description" content="Rifa solidaria a beneficio de un tratamiento médico contra el cáncer. Premio: Televisor Hisense Smart TV 32&quot; HD. Boleto: L 100.">
+  <meta property="og:title" content="Rifa Solidaria · Tu apoyo es una luz de esperanza">
+  <meta property="og:description" content="Obtén tu número al azar por L 100 y apoya esta causa.">
+  <meta property="og:image" content="/assets/afiche.webp">
+  <meta name="theme-color" content="#b0186b">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;600;800;900&display=swap">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script type="module" src="/js/main.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">🎗️ Rifa Solidaria</span>
+    <button id="adminBtn" class="btn btn--ghost btn--sm" type="button">🔒 Admin</button>
+    <button id="logoutBtn" class="btn btn--ghost btn--sm" type="button" hidden>Salir del panel</button>
+  </header>
+
+  <!-- ================= VISTA PÚBLICA ================= -->
+  <main id="buyView" class="wrap">
+    <section class="hero card">
+      <img class="hero__img" src="/assets/afiche.webp" alt="Afiche de la Rifa Solidaria: premio Televisor Hisense Smart TV 32 pulgadas, precio 100 lempiras, sorteo 22/12/2026" width="1536" height="1024" fetchpriority="high">
+      <div class="hero__facts">
+        <div><small>Premio</small><strong id="factPrize"></strong></div>
+        <div><small>Boleto</small><strong id="factPrice"></strong></div>
+        <div><small>Sorteo</small><strong id="factDate"></strong></div>
+      </div>
+      <div class="progress" aria-label="Boletos disponibles">
+        <div class="progress__bar"><span id="pubBar"></span></div>
+        <p id="pubLeft" class="muted">Cargando boletos…</p>
+      </div>
+    </section>
+
+    <!-- Paso 1: sortear número -->
+    <section id="stepPick" class="card step">
+      <h1 class="script">Tu apoyo es una luz de esperanza</h1>
+      <p class="muted">Toca el botón y el sistema te asignará un número al azar entre los boletos disponibles.</p>
+      <div class="slot" aria-live="polite"><span class="slot__hash">#</span><span id="slotNum">???</span></div>
+      <button id="pickBtn" class="btn btn--primary btn--lg" type="button">🎟️ Obtener mi número</button>
+      <p id="pickMsg" class="msg" role="alert"></p>
+    </section>
+
+    <!-- Paso 2: datos -->
+    <section id="stepForm" class="card step" hidden>
+      <p class="eyebrow">¡Este es tu número!</p>
+      <div class="slot slot--win"><span class="slot__hash">#</span><span id="formNum"></span></div>
+      <p class="muted">Lo tienes apartado por <strong id="holdTimer">10:00</strong>. Completa tus datos para confirmarlo.</p>
+      <form id="buyForm" novalidate>
+        <label>Nombre completo
+          <input name="nombre" autocomplete="name" required minlength="2" maxlength="80" placeholder="Ej. María López">
+        </label>
+        <label>Teléfono (WhatsApp)
+          <input name="telefono" type="tel" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="Ej. 9999-9999" pattern="[0-9 +()\-]{8,20}">
+        </label>
+        <p id="formMsg" class="msg" role="alert"></p>
+        <button class="btn btn--primary btn--lg" type="submit">✅ Confirmar y enviar por WhatsApp</button>
+      </form>
+    </section>
+
+    <!-- Paso 3: listo -->
+    <section id="stepDone" class="card step" hidden>
+      <p class="eyebrow">¡Gracias de corazón! 💖</p>
+      <div class="slot slot--win"><span class="slot__hash">#</span><span id="doneNum"></span></div>
+      <p>Tu boleto quedó <strong>por verificar</strong>. Envía el mensaje por WhatsApp a la encargada de la rifa; ella te pedirá el comprobante de pago de <strong id="donePrice"></strong>.</p>
+      <a id="waLink" class="btn btn--wa btn--lg" href="#" target="_blank" rel="noopener noreferrer">💬 Enviar por WhatsApp</a>
+      <button id="againBtn" class="btn btn--ghost btn--lg" type="button">🎟️ Comprar otro boleto</button>
+    </section>
+
+    <p class="footnote">A beneficio de un tratamiento médico contra el cáncer.</p>
+  </main>
+
+  <!-- ================= PANEL ADMIN ================= -->
+  <main id="adminView" class="wrap wrap--wide" hidden>
+    <div class="admin-head">
+      <h1>Panel administrativo</h1>
+      <div class="admin-actions">
+        <button id="refreshBtn" class="btn btn--ghost btn--sm" type="button">↻ Actualizar</button>
+        <button id="waCfgBtn" class="btn btn--ghost btn--sm" type="button">📱 WhatsApp</button>
+        <button id="changePinBtn" class="btn btn--ghost btn--sm" type="button">🔑 Cambiar PIN</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="list" aria-selected="true">🎟️ Boletos</button>
+      <button class="tab" role="tab" data-tab="dash" aria-selected="false">📊 Dashboard</button>
+      <button class="tab" role="tab" data-tab="draw" aria-selected="false">🎡 Sorteo</button>
+    </nav>
+
+    <section id="tab-list" class="card" role="tabpanel">
+      <div class="filters">
+        <div id="chips" class="chips" role="group" aria-label="Filtrar por estado"></div>
+        <input id="search" type="search" placeholder="Buscar número, nombre o teléfono" aria-label="Buscar">
+      </div>
+      <div class="table-wrap">
+        <table class="tickets">
+          <thead><tr><th>#</th><th>Estado</th><th>Nombre</th><th>Teléfono</th><th>Apartado</th><th>Vendido</th><th>Acciones</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p id="emptyRows" class="muted center" hidden>No hay boletos con ese filtro.</p>
+    </section>
+
+    <section id="tab-dash" class="card" role="tabpanel" hidden>
+      <div id="kpis" class="kpis"></div>
+      <h2>Meta de recaudación</h2>
+      <div class="progress"><div class="progress__bar progress__bar--lg"><span id="goalBar"></span></div><p id="goalTxt" class="muted"></p></div>
+      <h2>Boletos por día</h2>
+      <div id="daysChart" class="days"></div>
+      <h2>Últimos movimientos</h2>
+      <ul id="recent" class="recent"></ul>
+    </section>
+
+    <section id="tab-draw" class="card" role="tabpanel" hidden>
+      <p class="muted">La ruleta incluye solo los boletos <strong>vendidos (verificados)</strong>. El ganador lo elige el servidor al azar y queda registrado.</p>
+      <div class="wheel-box">
+        <div class="wheel-pointer" aria-hidden="true">▼</div>
+        <canvas id="wheel" width="560" height="560" aria-label="Ruleta del sorteo"></canvas>
+      </div>
+      <p id="drawInfo" class="muted center"></p>
+      <div class="center"><button id="spinBtn" class="btn btn--primary btn--lg" type="button">🎡 Girar ruleta</button></div>
+      <div id="winnerBox" class="winner" hidden>
+        <p class="eyebrow">🏆 Número ganador</p>
+        <div class="slot slot--win"><span class="slot__hash">#</span><span id="winNum"></span></div>
+        <p><strong id="winName"></strong> · <span id="winPhone"></span></p>
+        <p class="muted" id="winDate"></p>
+        <div class="row">
+          <button id="dlPng" class="btn btn--primary" type="button">⬇️ Descargar PNG</button>
+          <button id="dlJpg" class="btn btn--ghost" type="button">⬇️ Descargar JPEG</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- PIN -->
+  <dialog id="pinDlg" class="dialog">
+    <form id="pinForm" method="dialog" novalidate>
+      <h2>Acceso administrativo</h2>
+      <label>PIN de 6 dígitos
+        <input id="pinInput" class="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="6" pattern="\d{6}" required>
+      </label>
+      <p id="pinMsg" class="msg" role="alert"></p>
+      <div class="row">
+        <button value="cancel" formnovalidate class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit">Entrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="changePinDlg" class="dialog">
+    <form id="changePinForm" method="dialog" novalidate>
+      <h2>Cambiar PIN</h2>
+      <label>Nuevo PIN (6 dígitos)
+        <input name="p1" class="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6" required>
+      </label>
+      <label>Repite el nuevo PIN
+        <input name="p2" class="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6" required>
+      </label>
+      <p id="changePinMsg" class="msg" role="alert"></p>
+      <div class="row">
+        <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="waDlg" class="dialog">
+    <form id="waForm" method="dialog" novalidate>
+      <h2>WhatsApp de la encargada</h2>
+      <p class="muted">Aquí llegan los mensajes de compra. Usa el código de país, por ejemplo 504 seguido del número.</p>
+      <label>Número
+        <input name="wa" type="tel" inputmode="tel" autocomplete="off" maxlength="20" required placeholder="504XXXXXXXX">
+      </label>
+      <p id="waMsg" class="msg" role="alert"></p>
+      <div class="row">
+        <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <noscript><p class="center">Esta página necesita JavaScript activado.</p></noscript>
+</body>
+</html>

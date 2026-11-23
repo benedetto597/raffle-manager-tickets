@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual de usuario · Rifa Solidaria</title>
+<style>
+  @page { size: Letter; margin: 18mm 16mm; }
+  body { font: 11.5pt/1.55 "Segoe UI", Arial, sans-serif; color: #3d0f2f; }
+  h1 { color: #b0186b; font-size: 26pt; margin: 0 0 4pt; }
+  h2 { color: #5b1446; border-bottom: 2px solid #f3d3e3; padding-bottom: 3pt; margin-top: 20pt; page-break-after: avoid; }
+  h3 { color: #b0186b; margin: 12pt 0 4pt; }
+  .cover { text-align: center; padding: 30pt 0 10pt; }
+  .cover img { width: 100%; border-radius: 10pt; margin-top: 14pt; }
+  .muted { color: #7a5470; }
+  .box { background: #fdf0f6; border-left: 4px solid #e84a8a; padding: 8pt 12pt; border-radius: 6pt; margin: 8pt 0; }
+  .warn { background: #fff3d6; border-color: #d98a00; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0; }
+  th, td { border: 1px solid #f3d3e3; padding: 5pt 8pt; text-align: left; vertical-align: top; }
+  th { background: #fdf0f6; }
+  ol li, ul li { margin: 3pt 0; }
+  .badge { display: inline-block; padding: 1pt 7pt; border-radius: 9pt; font-weight: 700; font-size: 9.5pt; }
+  .d { background: #eef1f5; color: #55606e; } .p { background: #fff3d6; color: #8a5a00; } .v { background: #dcf5e6; color: #146c3b; }
+  .pb { page-break-before: always; }
+  code { background: #fdf0f6; padding: 0 4pt; border-radius: 3pt; }
+</style>
+</head>
+<body>
+<section class="cover">
+  <h1>Rifa Solidaria</h1>
+  <p class="muted">Manual de usuario · v1.0 · Noviembre 2026</p>
+  <p><strong>Sitio:</strong> https://raffle-manager-tickets.vercel.app</p>
+  <img src="../../assets/afiche.webp" alt="Afiche de la rifa">
+</section>
+
+<h2>1. ¿Qué es?</h2>
+<p>Página web para vender los <strong>200 boletos</strong> (L 100 cada uno, meta L 20,000) de la rifa a beneficio de un tratamiento médico contra el cáncer. Premio: <strong>Televisor Hisense Smart TV 32" HD</strong>. Sorteo: <strong>22/12/2026</strong>.</p>
+<p>Tiene dos partes: la <strong>vista pública</strong>, para quienes compran, y el <strong>panel administrativo</strong>, para la persona encargada, que se abre con un PIN.</p>
+
+<h2>2. Estados de un boleto</h2>
+<table>
+  <tr><th>Estado</th><th>Significado</th></tr>
+  <tr><td><span class="badge d">Disponible</span></td><td>Nadie lo ha pedido. Puede salir al azar.</td></tr>
+  <tr><td><span class="badge p">Por verificar</span></td><td>Una persona lo pidió y envió el WhatsApp. Falta confirmar el comprobante de pago.</td></tr>
+  <tr><td><span class="badge v">Vendido</span></td><td>La encargada verificó el pago. Participa en el sorteo.</td></tr>
+</table>
+
+<h2>3. Para quien compra</h2>
+<ol>
+  <li>Abre el enlace de la rifa.</li>
+  <li>Toca <strong>🎟️ Obtener mi número</strong>. Pasan números al azar, solo de los disponibles, hasta detenerse en el tuyo.</li>
+  <li>El número queda <strong>apartado 10 minutos</strong>. Escribe tu <strong>nombre completo</strong> y tu <strong>teléfono</strong>.</li>
+  <li>Toca <strong>✅ Confirmar y enviar por WhatsApp</strong>. Se abre WhatsApp con un mensaje listo para la encargada, que incluye el número, tu nombre, tu teléfono y el monto. Envíalo.</li>
+  <li>La encargada te responderá pidiendo el <strong>comprobante de pago</strong>.</li>
+  <li>Para comprar más, toca <strong>🎟️ Comprar otro boleto</strong>.</li>
+</ol>
+<div class="box">Si WhatsApp no se abre solo, toca el botón verde <strong>💬 Enviar por WhatsApp</strong>. Si pasan los 10 minutos sin confirmar, el número se libera y debes pedir otro.</div>
+
+<h2 class="pb">4. Panel administrativo</h2>
+<h3>4.1 Entrar y salir</h3>
+<ol>
+  <li>Toca <strong>🔒 Admin</strong>, en la esquina superior derecha.</li>
+  <li>Escribe el <strong>PIN de 6 dígitos</strong> y toca <strong>Entrar</strong>.</li>
+  <li><strong>📱 WhatsApp</strong>: número que recibe los mensajes de compra. <strong>Configúralo con el número de la encargada antes de compartir el enlace.</strong></li>
+  <li>Para salir, toca <strong>Salir del panel</strong>. Al recargar la página también se cierra la sesión.</li>
+</ol>
+<div class="box warn"><strong>Seguridad:</strong> después de 5 intentos fallidos, el acceso se bloquea 10 minutos. El PIN inicial lo entrega el administrador técnico. <strong>Cámbialo la primera vez que entres</strong> con <strong>🔑 Cambiar PIN</strong>.</div>
+
+<h3>4.2 Pestaña 🎟️ Boletos (verificar pagos)</h3>
+<ul>
+  <li>Al entrar se muestra el filtro <span class="badge p">Por verificar</span> para avanzar rápido. Cada filtro muestra su cantidad.</li>
+  <li>El buscador acepta número (<code>26</code> o <code>#026</code>), nombre o parte del teléfono.</li>
+  <li>El teléfono es un enlace: abre WhatsApp con esa persona para pedirle el comprobante.</li>
+  <li>Acciones:
+    <ul>
+      <li><strong>✓ Verificar pago</strong>: el boleto pasa de <span class="badge p">Por verificar</span> a <span class="badge v">Vendido</span> y se guarda la fecha de venta.</li>
+      <li><strong>Liberar</strong>: si la persona no pagó, el boleto vuelve a <span class="badge d">Disponible</span> y se borran sus datos. Pide confirmación.</li>
+      <li><strong>↩ Por verificar</strong>: deshace una verificación hecha por error.</li>
+    </ul>
+  </li>
+  <li>Toca <strong>↻ Actualizar</strong> para ver las compras nuevas.</li>
+</ul>
+
+<h3>4.3 Pestaña 📊 Dashboard</h3>
+<ul>
+  <li>Muestra la cantidad y el monto de boletos vendidos, por verificar, disponibles y el total apartado.</li>
+  <li>Barra de la meta: lo verificado frente a L 20,000.</li>
+  <li>Gráfica de <strong>boletos por día</strong>. El día con más ventas aparece en amarillo.</li>
+  <li>Lista de los últimos movimientos.</li>
+</ul>
+
+<h3>4.4 Pestaña 🎡 Sorteo</h3>
+<ol>
+  <li>La ruleta incluye <strong>solo los boletos Vendidos</strong>. Verifica todos los pagos antes del sorteo.</li>
+  <li>Toca <strong>🎡 Girar ruleta</strong>. El servidor elige el ganador al azar y lo registra; la ruleta se detiene en ese número.</li>
+  <li>Descarga la imagen del ganador con <strong>⬇️ Descargar PNG</strong> o <strong>⬇️ Descargar JPEG</strong> para compartirla. La imagen oculta parte del teléfono.</li>
+</ol>
+<div class="box">Si vuelves a girar, el sistema pide confirmación y el nuevo resultado pasa a ser el ganador vigente. El boleto ganador no se puede liberar.</div>
+
+<h2>5. Preguntas frecuentes</h2>
+<p><strong>¿Pueden salir dos personas con el mismo número?</strong> No. La base de datos asigna cada número a una sola persona.</p>
+<p><strong>¿Quién ve los datos de los compradores?</strong> Solo quien entra al panel con el PIN. La página pública no muestra nombres ni teléfonos.</p>
+<p><strong>¿Cómo cambio el número de WhatsApp que recibe los mensajes?</strong> En el panel, toca <strong>📱 WhatsApp</strong>, escribe el número con código de país (ej. 504 y el número) y guarda. Aplica de inmediato.</p>
+<p><strong>Olvidé el PIN.</strong> El administrador técnico puede restablecerlo desde la base de datos (Supabase). Las instrucciones están en el README del proyecto.</p>
+</body>
+</html>
