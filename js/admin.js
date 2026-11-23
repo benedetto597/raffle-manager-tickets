@@ -1,6 +1,6 @@
 import { CONFIG } from './config.js';
 import { rpc } from './api.js';
-import { $, el, pad, money, fmtDate, dayKey, waLink, toast } from './util.js';
+import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js';
 import { drawWheel, spinTo, downloadWinner } from './wheel.js';
 import { refreshPublic, loadWhatsapp } from './buy.js';
 
@@ -65,12 +65,13 @@ function renderChips() {
   })));
 }
 
-function actionBtn(label, cls, n, status, confirmMsg) {
+function actionBtn(label, cls, n, status, confirm) {
   return el('button', {
     class: `btn btn--xs ${cls}`, type: 'button', text: label,
     onclick: (ev) => guarded(async () => {
-      if (confirmMsg && !confirm(confirmMsg)) return;
-      ev.currentTarget.disabled = true;
+      const btn = ev.currentTarget;
+      if (confirm && !(await confirmDialog(...confirm))) return;
+      btn.disabled = true;
       await rpc('admin_set_status', { p_pin: state.pin, p_n: n, p_status: status });
       toast(`Boleto #${pad(n)} → ${LABEL[status]}`, 'ok');
       await load();
@@ -92,7 +93,8 @@ function renderRows() {
     if (t.status === 'por_verificar') {
       acts.append(
         actionBtn('✓ Verificar pago', 'btn--primary', t.n, 'vendido'),
-        actionBtn('Liberar', 'btn--ghost', t.n, 'disponible', `¿Liberar el boleto #${pad(t.n)}? Se borrarán los datos de ${t.nombre}.`),
+        actionBtn('Liberar', 'btn--ghost', t.n, 'disponible',
+          [`Liberar boleto #${pad(t.n)}`, `El boleto volverá a estar disponible y se borrarán los datos de ${t.nombre}.`, 'Liberar']),
       );
     } else if (t.status === 'vendido') {
       acts.append(actionBtn('↩ Por verificar', 'btn--ghost', t.n, 'por_verificar'));
@@ -167,7 +169,8 @@ function renderDraw() {
 }
 
 async function spin() {
-  if (state.draw && !confirm(`Ya hay un ganador registrado (#${pad(state.draw.n)}). ¿Sortear de nuevo? El nuevo resultado será el ganador vigente.`)) return;
+  if (state.draw && !(await confirmDialog('Sortear de nuevo',
+    `Ya hay un ganador registrado (#${pad(state.draw.n)}). El nuevo resultado será el ganador vigente.`, 'Sortear'))) return;
   const btn = $('#spinBtn');
   btn.disabled = true;
   $('#winnerBox').hidden = true;

@@ -33,5 +33,16 @@ export function toast(msg, kind = 'info') {
   setTimeout(() => t.remove(), 4500);
 }
 
-export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/** Ventana de confirmación con el estilo de la app. Resuelve true si se acepta. */
+export function confirmDialog(title, message, okText = 'Aceptar') {
+  const dlg = $('#confirmDlg');
+  $('#confirmTitle').textContent = title;
+  $('#confirmMsg').textContent = message;
+  $('#confirmOk').textContent = okText;
+  dlg.returnValue = '';
+  dlg.showModal();
+  return new Promise((resolve) => dlg.addEventListener('close', () => resolve(dlg.returnValue === 'ok'), { once: true }));
+}
+
+export const sleep =(ms) => new Promise((r) => setTimeout(r, ms));
 export const prefersReducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;

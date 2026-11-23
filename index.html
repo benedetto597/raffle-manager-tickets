@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;600;800;900&display=swap">
-  <link rel="stylesheet" href="/css/styles.css?v=aeaf66e">
-  <script type="module" src="/js/main.js?v=aeaf66e"></script>
+  <link rel="stylesheet" href="/css/styles.css?v=5">
+  <script type="module" src="/js/main.js?v=5"></script>
 </head>
 <body>
   <header class="topbar">
@@ -186,6 +186,17 @@
       <div class="row">
         <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
         <button class="btn btn--primary" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmDlg" class="dialog">
+    <form method="dialog">
+      <h2 id="confirmTitle"></h2>
+      <p id="confirmMsg" class="muted"></p>
+      <div class="row">
+        <button value="cancel" class="btn btn--ghost">Cancelar</button>
+        <button id="confirmOk" value="ok" class="btn btn--primary">Aceptar</button>
       </div>
     </form>
   </dialog>
