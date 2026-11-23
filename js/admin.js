@@ -100,14 +100,15 @@ function renderRows() {
     const phone = t.telefono
       ? el('a', { href: waLink(waNumber(t.telefono), `Hola ${t.nombre}, te escribo por tu boleto #${pad(t.n)} de la Rifa Solidaria.`), target: '_blank', rel: 'noopener noreferrer', text: fmtPhone(t.telefono) })
       : '—';
+    const empty = (v) => (v ? null : 'is-empty'); // en móvil se ocultan campos vacíos
     frag.append(el('tr', {},
       el('td', { text: `#${pad(t.n)}` }),
       el('td', {}, el('span', { class: `badge badge--${t.status}`, text: LABEL[t.status] })),
-      el('td', { 'data-label': 'Nombre', text: t.nombre ?? '—' }),
-      el('td', { 'data-label': 'Teléfono' }, phone),
-      el('td', { 'data-label': 'Apartado', text: fmtDate(t.reservado_at) }),
-      el('td', { 'data-label': 'Vendido', text: fmtDate(t.vendido_at) }),
-      el('td', {}, acts),
+      el('td', { 'data-label': 'Nombre', class: empty(t.nombre), text: t.nombre ?? '—' }),
+      el('td', { 'data-label': 'Teléfono', class: empty(t.telefono) }, phone),
+      el('td', { 'data-label': 'Apartado', class: empty(t.reservado_at), text: fmtDate(t.reservado_at) }),
+      el('td', { 'data-label': 'Vendido', class: empty(t.vendido_at), text: fmtDate(t.vendido_at) }),
+      el('td', { class: acts.childElementCount ? null : 'is-empty' }, acts),
     ));
   }
   $('#rows').replaceChildren(frag);
