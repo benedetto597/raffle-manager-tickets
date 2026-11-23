@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js?v=6';
-import { rpc } from './api.js?v=6';
-import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js?v=6';
-import { drawWheel, spinTo, downloadWinner } from './wheel.js?v=6';
-import { refreshPublic, loadWhatsapp } from './buy.js?v=6';
+import { rpc } from './api.js?v=7';
+import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js?v=7';
+import { drawWheel, spinTo, downloadWinner } from './wheel.js?v=7';
+import { refreshPublic, loadWhatsapp } from './buy.js?v=7';
+import { settings, loadSettings } from './settings.js?v=7';
 
 const LABEL = { disponible: 'Disponible', por_verificar: 'Por verificar', vendido: 'Vendido' };
 const FILTERS = [['all', 'Todos'], ['por_verificar', 'Por verificar'], ['vendido', 'Vendidos'], ['disponible', 'Disponibles']];
@@ -21,9 +21,10 @@ function setView(admin) {
 }
 
 async function load() {
-  const data = await rpc('admin_list', { p_pin: state.pin });
+  const [data] = await Promise.all([rpc('admin_list', { p_pin: state.pin }), loadSettings()]);
   state.tickets = data.tickets;
   state.draw = data.draw;
+  settings.total = data.tickets.length;
   render();
 }
 
@@ -122,14 +123,14 @@ function renderDash() {
   const kpi = (label, value, sub, cls = '') =>
     el('div', { class: `kpi ${cls}` }, el('small', { text: label }), el('strong', { text: value }), el('span', { class: 'muted', text: sub }));
   $('#kpis').replaceChildren(
-    kpi('Vendidos', c.vendido, money(c.vendido * CONFIG.PRICE), 'kpi--ok'),
-    kpi('Por verificar', c.por_verificar, money(c.por_verificar * CONFIG.PRICE), 'kpi--warn'),
-    kpi('Disponibles', c.disponible, `de ${CONFIG.TOTAL}`),
-    kpi('Total apartado', c.vendido + c.por_verificar, `${Math.round(((c.vendido + c.por_verificar) / CONFIG.TOTAL) * 100)}% de los boletos`),
+    kpi('Vendidos', c.vendido, money(c.vendido * settings.price), 'kpi--ok'),
+    kpi('Por verificar', c.por_verificar, money(c.por_verificar * settings.price), 'kpi--warn'),
+    kpi('Disponibles', c.disponible, `de ${settings.total}`),
+    kpi('Total apartado', c.vendido + c.por_verificar, `${Math.round(((c.vendido + c.por_verificar) / settings.total) * 100)}% de los boletos`),
   );
-  const got = c.vendido * CONFIG.PRICE;
-  $('#goalBar').style.width = `${Math.min(100, (got / CONFIG.GOAL) * 100)}%`;
-  $('#goalTxt').textContent = `${money(got)} verificados de ${money(CONFIG.GOAL)} (${Math.round((got / CONFIG.GOAL) * 100)}%) · ${money(c.por_verificar * CONFIG.PRICE)} por verificar`;
+  const got = c.vendido * settings.price;
+  $('#goalBar').style.width = `${Math.min(100, (got / settings.goal) * 100)}%`;
+  $('#goalTxt').textContent = `${money(got)} verificados de ${money(settings.goal)} (${Math.round((got / settings.goal) * 100)}%) · ${money(c.por_verificar * settings.price)} por verificar`;
 
   const byDay = new Map();
   for (const t of state.tickets) if (t.reservado_at) { const k = dayKey(t.reservado_at); byDay.set(k, (byDay.get(k) ?? 0) + 1); }
@@ -248,9 +249,45 @@ async function onSaveWhatsapp(ev) {
   } catch (e) { msg.textContent = e.message; }
 }
 
+function goalPreview() {
+  const v = Number($('#goalForm').elements.goal.value);
+  const ok = Number.isInteger(v) && v > 0 && v % settings.price === 0;
+  $('#goalPreview').textContent = ok
+    ? `${money(v)} = ${v / settings.price} boletos de ${money(settings.price)}`
+    : `Debe ser múltiplo de ${money(settings.price)}.`;
+  return ok ? v : null;
+}
+
+async function onSaveGoal(ev) {
+  ev.preventDefault();
+  const msg = $('#goalMsg');
+  const v = goalPreview();
+  if (!v) { msg.textContent = `La meta debe ser un múltiplo de ${money(settings.price)}.`; return; }
+  const btn = ev.currentTarget.querySelector('[type="submit"]');
+  btn.disabled = true;
+  try {
+    const r = await rpc('admin_set_goal', { p_pin: state.pin, p_goal: v });
+    await load();
+    refreshPublic();
+    $('#goalDlg').close();
+    toast(`Meta actualizada: ${money(v)} (${r.total} boletos).`, 'ok');
+  } catch (e) { msg.textContent = e.message; } finally { btn.disabled = false; }
+}
+
 export function initAdmin() {
-  const pinDlg = $('#pinDlg'), cpDlg = $('#changePinDlg'), waDlg = $('#waDlg');
-  bindDialog(pinDlg); bindDialog(cpDlg); bindDialog(waDlg);
+  const pinDlg = $('#pinDlg'), cpDlg = $('#changePinDlg'), waDlg = $('#waDlg'), goalDlg = $('#goalDlg');
+  bindDialog(pinDlg); bindDialog(cpDlg); bindDialog(waDlg); bindDialog(goalDlg);
+  $('#goalBtn').addEventListener('click', async () => {
+    $('#goalMsg').textContent = '';
+    await loadSettings();
+    const input = $('#goalForm').elements.goal;
+    input.value = settings.goal;
+    input.step = settings.price;
+    goalPreview();
+    goalDlg.showModal();
+  });
+  $('#goalForm').elements.goal.addEventListener('input', goalPreview);
+  $('#goalForm').addEventListener('submit', onSaveGoal);
   $('#waCfgBtn').addEventListener('click', async () => {
     $('#waMsg').textContent = '';
     $('#waForm').elements.wa.value = (await loadWhatsapp()) ?? '';

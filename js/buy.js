@@ -1,15 +1,21 @@
-import { CONFIG } from './config.js?v=6';
-import { rpc } from './api.js?v=6';
-import { $, pad, money, waLink, sleep, prefersReducedMotion } from './util.js?v=6';
+import { CONFIG } from './config.js?v=7';
+import { rpc } from './api.js?v=7';
+import { $, pad, money, waLink, sleep, prefersReducedMotion } from './util.js?v=7';
+import { settings, loadSettings, onSettings } from './settings.js?v=7';
 
 const HOLD_MS = 9.8 * 60 * 1000; // margen bajo los 10 min del servidor
 let hold = null; // { n, token }
 let timerId = 0;
-let whatsappTo = null;
+let lastLeft = null;
 
 export async function loadWhatsapp() {
-  try { whatsappTo = (await rpc('public_config')).whatsapp; } catch { /* se reintenta al confirmar */ }
-  return whatsappTo;
+  return (await loadSettings()).whatsapp;
+}
+
+function renderPrice() {
+  $('#factPrice').textContent = money(settings.price);
+  $('#donePrice').textContent = money(settings.price);
+  if (lastLeft != null) updateProgress(lastLeft);
 }
 
 const showStep = (id) => {
@@ -17,16 +23,18 @@ const showStep = (id) => {
 };
 
 function updateProgress(left) {
-  $('#pubBar').style.width = `${((CONFIG.TOTAL - left) / CONFIG.TOTAL) * 100}%`;
+  lastLeft = left;
+  const total = Math.max(settings.total, left);
+  $('#pubBar').style.width = `${((total - left) / total) * 100}%`;
   $('#pubLeft').textContent = left
-    ? `Quedan ${left} de ${CONFIG.TOTAL} boletos disponibles`
+    ? `Quedan ${left} de ${total} boletos disponibles`
     : '¡Boletos agotados! Gracias por tu apoyo.';
   $('#pickBtn').disabled = left === 0;
 }
 
 export async function refreshPublic() {
   try {
-    const nums = await rpc('available_numbers');
+    const [nums] = await Promise.all([rpc('available_numbers'), loadSettings()]);
     updateProgress(nums.length);
     return nums;
   } catch (e) {
@@ -103,7 +111,7 @@ function buildMessage(n, nombre, tel) {
     `Hola, quiero comprar el boleto *#${pad(n)}*.`,
     `👤 Nombre: ${nombre}`,
     `📱 Teléfono: ${tel}`,
-    `💵 Monto: ${money(CONFIG.PRICE)}`,
+    `💵 Monto: ${money(settings.price)}`,
     '',
     'Por favor indícame cómo enviarte el comprobante de pago. ¡Gracias!',
   ].join('\n');
@@ -126,7 +134,7 @@ async function onSubmit(ev) {
     const n = await rpc('confirm_ticket', { p_token: hold.token, p_nombre: nombre, p_tel: tel });
     clearInterval(timerId);
     hold = null;
-    const to = whatsappTo ?? (await loadWhatsapp()) ?? '';
+    const to = settings.whatsapp ?? (await loadWhatsapp()) ?? '';
     const url = waLink(to, buildMessage(n, nombre, tel));
     $('#doneNum').textContent = pad(n);
     $('#waLink').href = url;
@@ -142,12 +150,11 @@ async function onSubmit(ev) {
 
 export function initBuy() {
   $('#factPrize').textContent = 'TV Hisense 32"';
-  $('#factPrice').textContent = money(CONFIG.PRICE);
   $('#factDate').textContent = CONFIG.DRAW_DATE;
-  $('#donePrice').textContent = money(CONFIG.PRICE);
+  renderPrice();
+  onSettings(renderPrice);
   $('#pickBtn').addEventListener('click', onPick);
   $('#buyForm').addEventListener('submit', onSubmit);
   $('#againBtn').addEventListener('click', () => resetPick());
   refreshPublic();
-  loadWhatsapp();
 }

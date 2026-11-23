@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js?v=6';
+import { CONFIG } from './config.js?v=7';
 
 const MESSAGES = {
   AGOTADO: 'Ya no quedan boletos disponibles. ¡Gracias por tu apoyo!',
@@ -13,11 +13,15 @@ const MESSAGES = {
   ganador: 'No se puede liberar el boleto ganador.',
   sin_vendidos: 'Aún no hay boletos vendidos (verificados) para sortear.',
   boleto: 'Boleto no encontrado.',
+  meta_multiplo: 'La meta debe ser un múltiplo del precio del boleto.',
+  meta_max: 'La meta es demasiado alta (máximo 5000 boletos).',
+  meta_ocupado: (d) => `No se puede reducir: el boleto #${String(d.n).padStart(3, '0')} ya está apartado, vendido o es ganador. Solo se eliminan boletos libres del final.`,
 };
 
 export class ApiError extends Error {
-  constructor(code) {
-    super(MESSAGES[code] ?? 'Ocurrió un error de conexión. Intenta de nuevo.');
+  constructor(code, data = {}) {
+    const m = MESSAGES[code];
+    super(typeof m === 'function' ? m(data) : m ?? 'Ocurrió un error de conexión. Intenta de nuevo.');
     this.code = code;
   }
 }
@@ -37,6 +41,6 @@ export async function rpc(fn, args = {}) {
   }
   const data = await res.json().catch(() => null);
   if (!res.ok) throw new ApiError(data?.message ?? 'RED');
-  if (data && typeof data === 'object' && 'error' in data) throw new ApiError(data.error);
+  if (data && typeof data === 'object' && 'error' in data) throw new ApiError(data.error, data);
   return data;
 }

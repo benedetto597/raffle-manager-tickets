@@ -11,7 +11,7 @@ Web para vender boletos de una rifa a beneficio de un tratamiento médico contra
 Cada persona obtiene **un número al azar entre los disponibles**, registra sus datos y confirma por **WhatsApp** con la encargada.
 La encargada verifica los pagos y hace el sorteo desde un **panel protegido con PIN**.
 
-- 200 boletos × L 100 = meta de **L 20,000**
+- Meta inicial **L 20,000** ÷ L 100 = 200 boletos (la meta se cambia desde el panel)
 - Premio: Televisor Hisense Smart TV 32" HD · Sorteo: 22/12/2026
 - 📘 [Manual de usuario (PDF)](docs/manual/Manual-de-usuario.pdf)
 
@@ -39,6 +39,7 @@ La encargada verifica los pagos y hace el sorteo desde un **panel protegido con 
 - **Boletos:** lista del 1 al 200 con filtros por estado (*Disponible*, *Por verificar*, *Vendido*) y búsqueda. Acciones: verificar pago, liberar y revertir. Incluye enlace a WhatsApp de cada comprador.
 - **Dashboard:** KPIs, avance de la meta, boletos por día (resalta el mejor día) y últimos movimientos.
 - **Sorteo:** ruleta con los boletos vendidos. El ganador lo elige el servidor y queda registrado; la imagen del ganador se descarga en **PNG o JPEG**.
+- **Meta** configurable: recalcula la cantidad de boletos (meta ÷ precio) y actualiza todos los textos.
 - Cambiar PIN, configurar el WhatsApp destino y salir del panel.
 
 ## Arquitectura
@@ -61,12 +62,13 @@ Supabase Postgres
 | `admin_set_status(pin, n, status)` | PIN | Transiciones válidas de estado |
 | `admin_draw(pin)` | PIN | Sorteo aleatorio entre vendidos, registrado en `draws` |
 | `admin_change_pin(pin, nuevo)` | PIN | Cambia el PIN |
-| `public_config()` | público | WhatsApp destino |
+| `public_config()` | público | WhatsApp destino, meta, precio y total de boletos |
+| `admin_set_goal(pin, meta)` | PIN | Cambia la meta; agrega o quita boletos libres del final |
 | `admin_set_whatsapp(pin, num)` | PIN | Cambia el WhatsApp destino |
 
 ## Seguridad
 
-- **Sin acceso directo a tablas:** la anon/publishable key solo puede ejecutar las 9 funciones listadas; `_auth` es interna.
+- **Sin acceso directo a tablas:** la anon/publishable key solo puede ejecutar las 10 funciones listadas; `_auth` es interna.
 - **PIN** guardado como hash **bcrypt** (`pgcrypto`). Tras **5 intentos fallidos** el acceso se bloquea **10 minutos**. El PIN nunca se versiona.
 - **Asignación atómica:** no puede haber números duplicados aunque compren varias personas a la vez.
 - **Anti-acaparamiento:** máximo 40 apartados activos simultáneos; los apartados vencidos vuelven al pool.
@@ -124,7 +126,7 @@ python -m http.server 5173
 |---|---|
 | `SUPABASE_URL`, `SUPABASE_KEY` | Proyecto Supabase (URL + publishable key) |
 | — | El WhatsApp de la encargada **no** está aquí: se configura en el panel (📱 WhatsApp) y se guarda en `admin_cfg` |
-| `TOTAL`, `PRICE`, `GOAL` | Boletos, precio y meta (si cambias `TOTAL`, ajusta también el `check` y el seed en la migración) |
+| `PRICE` | Valor inicial mientras carga; la meta, el precio y el total reales viven en `admin_cfg` (se cambian desde el panel: 🎯 Meta) |
 | `PRIZE`, `DRAW_DATE`, `TZ` | Textos y zona horaria |
 
 ## Operación
