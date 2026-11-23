@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=7';
-import { pad, prefersReducedMotion } from './util.js?v=7';
+import { CONFIG } from './config.js?v=9';
+import { pad, prefersReducedMotion } from './util.js?v=9';
 
 const COLORS = ['#e84a8a', '#b0186b', '#5b1446', '#f27bb0'];
 const TAU = Math.PI * 2;

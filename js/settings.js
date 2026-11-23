@@ -1,5 +1,5 @@
-import { rpc } from './api.js?v=7';
-import { CONFIG } from './config.js?v=7';
+import { rpc } from './api.js?v=9';
+import { CONFIG } from './config.js?v=9';
 
 /** Configuración viva desde la base (meta, precio, total de boletos, WhatsApp). */
 export const settings = { goal: 20000, price: CONFIG.PRICE, total: 200, whatsapp: null };

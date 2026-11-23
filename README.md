@@ -39,6 +39,7 @@ La encargada verifica los pagos y hace el sorteo desde un **panel protegido con 
 - **Boletos:** lista del 1 al 200 con filtros por estado (*Disponible*, *Por verificar*, *Vendido*) y búsqueda. Acciones: verificar pago, liberar y revertir. Incluye enlace a WhatsApp de cada comprador.
 - **Dashboard:** KPIs, avance de la meta, boletos por día (resalta el mejor día) y últimos movimientos.
 - **Sorteo:** ruleta con los boletos vendidos. El ganador lo elige el servidor y queda registrado; la imagen del ganador se descarga en **PNG o JPEG**.
+- **Venta manual:** registra boletos pagados fuera de la página (número elegido o al azar) directamente como vendidos; también desde el botón *Vender* de cada boleto disponible.
 - **Meta** configurable: recalcula la cantidad de boletos (meta ÷ precio) y actualiza todos los textos.
 - Cambiar PIN, configurar el WhatsApp destino y salir del panel.
 
@@ -63,12 +64,13 @@ Supabase Postgres
 | `admin_draw(pin)` | PIN | Sorteo aleatorio entre vendidos, registrado en `draws` |
 | `admin_change_pin(pin, nuevo)` | PIN | Cambia el PIN |
 | `public_config()` | público | WhatsApp destino, meta, precio y total de boletos |
+| `admin_add_sale(pin, n, nombre, tel)` | PIN | Registra una venta manual como *vendido* (`n` nulo = al azar) |
 | `admin_set_goal(pin, meta)` | PIN | Cambia la meta; agrega o quita boletos libres del final |
 | `admin_set_whatsapp(pin, num)` | PIN | Cambia el WhatsApp destino |
 
 ## Seguridad
 
-- **Sin acceso directo a tablas:** la anon/publishable key solo puede ejecutar las 10 funciones listadas; `_auth` es interna.
+- **Sin acceso directo a tablas:** la anon/publishable key solo puede ejecutar las 11 funciones listadas; `_auth` es interna.
 - **PIN** guardado como hash **bcrypt** (`pgcrypto`). Tras **5 intentos fallidos** el acceso se bloquea **10 minutos**. El PIN nunca se versiona.
 - **Asignación atómica:** no puede haber números duplicados aunque compren varias personas a la vez.
 - **Anti-acaparamiento:** máximo 40 apartados activos simultáneos; los apartados vencidos vuelven al pool.

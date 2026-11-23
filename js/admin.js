@@ -1,8 +1,8 @@
-import { rpc } from './api.js?v=7';
-import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js?v=7';
-import { drawWheel, spinTo, downloadWinner } from './wheel.js?v=7';
-import { refreshPublic, loadWhatsapp } from './buy.js?v=7';
-import { settings, loadSettings } from './settings.js?v=7';
+import { rpc } from './api.js?v=9';
+import { $, el, pad, money, fmtDate, dayKey, waLink, toast, confirmDialog } from './util.js?v=9';
+import { drawWheel, spinTo, downloadWinner } from './wheel.js?v=9';
+import { refreshPublic, loadWhatsapp } from './buy.js?v=9';
+import { settings, loadSettings } from './settings.js?v=9';
 
 const LABEL = { disponible: 'Disponible', por_verificar: 'Por verificar', vendido: 'Vendido' };
 const FILTERS = [['all', 'Todos'], ['por_verificar', 'Por verificar'], ['vendido', 'Vendidos'], ['disponible', 'Disponibles']];
@@ -99,6 +99,8 @@ function renderRows() {
       );
     } else if (t.status === 'vendido') {
       acts.append(actionBtn('↩ Por verificar', 'btn--ghost', t.n, 'por_verificar'));
+    } else {
+      acts.append(el('button', { class: 'btn btn--xs btn--ghost', type: 'button', text: '➕ Vender', onclick: () => openSale(t.n) }));
     }
     const phone = t.telefono
       ? el('a', { href: waLink(waNumber(t.telefono), `Hola ${t.nombre}, te escribo por tu boleto #${pad(t.n)} de la Rifa Solidaria.`), target: '_blank', rel: 'noopener noreferrer', text: fmtPhone(t.telefono) })
@@ -258,6 +260,43 @@ function goalPreview() {
   return ok ? v : null;
 }
 
+// ---------- Venta manual ----------
+function openSale(n = null) {
+  const f = $('#saleForm');
+  f.reset();
+  f.elements.n.value = n ?? '';
+  f.elements.n.max = settings.total;
+  $('#saleMsg').textContent = '';
+  $('#saleDlg').showModal();
+  (n ? f.elements.nombre : f.elements.n).focus();
+}
+
+async function onSaveSale(ev) {
+  ev.preventDefault();
+  const f = ev.currentTarget;
+  const msg = $('#saleMsg');
+  const raw = f.elements.n.value.trim().replace(/^#/, '');
+  const n = raw === '' ? null : Number(raw);
+  const nombre = f.elements.nombre.value.trim().replace(/\s+/g, ' ');
+  const tel = f.elements.telefono.value.replace(/\D/g, '');
+  if (n !== null && (!Number.isInteger(n) || n < 1 || n > settings.total)) { msg.textContent = `El número debe estar entre 1 y ${settings.total}, o déjalo vacío para asignar uno al azar.`; return; }
+  if (nombre.length < 2) { msg.textContent = 'Escribe el nombre completo del comprador.'; return; }
+  if (tel.length < 8 || tel.length > 15) { msg.textContent = 'Escribe un teléfono válido (8 a 15 dígitos).'; return; }
+  const btn = f.querySelector('[type="submit"]');
+  btn.disabled = true;
+  msg.textContent = '';
+  try {
+    const r = await rpc('admin_add_sale', { p_pin: state.pin, p_n: n, p_nombre: nombre, p_tel: tel });
+    $('#saleDlg').close();
+    await load();
+    refreshPublic();
+    toast(`Boleto #${pad(r.n)} registrado como vendido a ${nombre}.`, 'ok');
+  } catch (e) {
+    msg.textContent = e.message;
+    if (e.code === 'pin' || e.code === 'locked') { $('#saleDlg').close(); logout(); }
+  } finally { btn.disabled = false; }
+}
+
 async function onSaveGoal(ev) {
   ev.preventDefault();
   const msg = $('#goalMsg');
@@ -276,7 +315,9 @@ async function onSaveGoal(ev) {
 
 export function initAdmin() {
   const pinDlg = $('#pinDlg'), cpDlg = $('#changePinDlg'), waDlg = $('#waDlg'), goalDlg = $('#goalDlg');
-  bindDialog(pinDlg); bindDialog(cpDlg); bindDialog(waDlg); bindDialog(goalDlg);
+  bindDialog(pinDlg); bindDialog(cpDlg); bindDialog(waDlg); bindDialog(goalDlg); bindDialog($('#saleDlg'));
+  $('#saleBtn').addEventListener('click', () => openSale());
+  $('#saleForm').addEventListener('submit', onSaveSale);
   $('#goalBtn').addEventListener('click', async () => {
     $('#goalMsg').textContent = '';
     await loadSettings();

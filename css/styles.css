@@ -193,3 +193,10 @@ input:focus-visible { outline: none; border-color: var(--pink); box-shadow: 0 0 
 .site-footer .pi { width: 1em; height: auto; display: block; }
 @media (max-width: 560px) { .admin-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 #goalPreview { margin: 0; font-weight: 700; color: var(--plum); }
+@media (max-width: 900px) { .admin-actions #saleBtn { grid-column: 1 / -1; } }
+.dialog { max-height: calc(100dvh - 24px); overflow-y: auto; }
+@media (max-width: 400px) {
+  .dialog { padding: 18px; }
+  .dialog .row { flex-direction: column-reverse; }
+  .dialog .row .btn { width: 100%; }
+}

@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;600;800;900&display=swap">
-  <link rel="stylesheet" href="/css/styles.css?v=7">
-  <script type="module" src="/js/main.js?v=7"></script>
+  <link rel="stylesheet" href="/css/styles.css?v=9">
+  <script type="module" src="/js/main.js?v=9"></script>
 </head>
 <body>
   <header class="topbar">
@@ -81,6 +81,7 @@
     <div class="admin-head">
       <h1>Panel administrativo</h1>
       <div class="admin-actions">
+        <button id="saleBtn" class="btn btn--primary btn--sm" type="button">➕ Venta manual</button>
         <button id="refreshBtn" class="btn btn--ghost btn--sm" type="button">↻ Actualizar</button>
         <button id="goalBtn" class="btn btn--ghost btn--sm" type="button">🎯 Meta</button>
         <button id="waCfgBtn" class="btn btn--ghost btn--sm" type="button">📱 WhatsApp</button>
@@ -187,6 +188,27 @@
       <div class="row">
         <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
         <button class="btn btn--primary" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="saleDlg" class="dialog">
+    <form id="saleForm" method="dialog" novalidate>
+      <h2>Registrar venta manual</h2>
+      <p class="muted">Para boletos ya pagados fuera de la página. Quedan directamente como vendidos.</p>
+      <label>Número de boleto
+        <input name="n" type="number" inputmode="numeric" min="1" placeholder="Vacío = número al azar">
+      </label>
+      <label>Nombre completo
+        <input name="nombre" autocomplete="off" maxlength="80" required placeholder="Ej. María López">
+      </label>
+      <label>Teléfono
+        <input name="telefono" type="tel" inputmode="tel" autocomplete="off" maxlength="20" required placeholder="Ej. 9999-9999">
+      </label>
+      <p id="saleMsg" class="msg" role="alert"></p>
+      <div class="row">
+        <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit">Registrar venta</button>
       </div>
     </form>
   </dialog>
