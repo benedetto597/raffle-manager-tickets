@@ -7,6 +7,14 @@
 ![Supabase](https://img.shields.io/badge/DB-Supabase-3ecf8e)
 ![Vercel](https://img.shields.io/badge/deploy-Vercel-black)
 
+<!-- en-summary -->
+> **In English.** Live web app for a charity raffle: each buyer gets a random available number and confirms by WhatsApp; the organizer verifies payments and runs the draw from a PIN-protected admin panel. The full documentation below is in Spanish.
+
+- **Architecture:** vanilla HTML/CSS/JS (no build step) that talks to Supabase Postgres only through 11 `SECURITY DEFINER` RPC functions. Tables have RLS enabled with no policies, so they cannot be read directly.
+- **Correctness and security:** atomic ticket assignment with `FOR UPDATE SKIP LOCKED` (no duplicate numbers under concurrent buyers), bcrypt-hashed PIN with a 10-minute lockout after 5 failed attempts, server-side validation, strict CSP without `unsafe-inline`, HSTS.
+- **Stack:** JavaScript (ES modules), Supabase (Postgres, pgcrypto), Vercel.
+- **Run locally:** `python -m http.server 5173`, then open `http://localhost:5173`.
+
 Web para vender boletos de una rifa a beneficio de un tratamiento médico contra el cáncer.
 Cada persona obtiene **un número al azar entre los disponibles**, registra sus datos y confirma por **WhatsApp** con la encargada.
 La encargada verifica los pagos y hace el sorteo desde un **panel protegido con PIN**.
